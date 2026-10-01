@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#cfc6b8">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- The hero frame is the bridge between the Reel and the webpage. Prioritise it. -->
+  <link rel="preload" as="image" href="assets/hero-frame.png" fetchpriority="high">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Tiny critical paint layer: prevents a browser white flash before style.css is ready. -->
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; background: #cfc6b8; }
+    body { overflow: hidden; }
+    .experience { width: 100%; height: 100dvh; min-height: 100svh; overflow: hidden; position: relative; background: #cfc6b8; }
+    .visual { position: absolute; inset: 0; overflow: hidden; background: #cfc6b8; }
+    .visual__image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; }
+  </style>
+</head>
+<body>
+  <main class="experience" id="experience">
+    <section class="visual" id="visual" aria-label="Interactive sneaker ad">
+      <!-- Exact transition plate. Keep this image unchanged. -->
+      <img
+        id="heroImage"
+        class="visual__image"
+        src="assets/hero-frame.png"
+        alt=""
+        width="482"
+        height="852"
+        decoding="async"
+        fetchpriority="high"
+        draggable="false"
+      >
+
+      <!-- Same image, masked to the foreground sneaker for the prototype colour treatment. -->
+      <div class="recolor-layer" id="recolorLayer" aria-hidden="true">
+        <img
+          class="visual__image recolor-layer__image"
+          src="assets/hero-frame.png"
+          alt=""
+          width="482"
+          height="852"
+          decoding="async"
+          draggable="false"
+        >
+      </div>
+
+      <!-- Invisible product hotspot: only becomes tappable after continuity is established. -->
+      <button
+        id="shoeHotspot"
+        class="shoe-hotspot"
+        type="button"
+        aria-label="Explore the sneaker"
+      ></button>
+
+      <!-- Minimal hint shown after the handoff. -->
+      <div id="hint" class="hint" aria-hidden="true">Tap to explore</div>
+
+      <!-- Minimal interactive bottom area; hidden until the product is tapped. -->
+      <div id="controls" class="controls" aria-hidden="true">
+        <div class="controls__topline">
+          <span class="controls__eyebrow">THE SHOT CONTINUES</span>
+          <button id="closeControls" class="controls__close" type="button" aria-label="Close product controls">×</button>
+        </div>
+
+        <div class="controls__row">
+          <div class="swatches" role="group" aria-label="Shoe colours">
+            <button class="swatch is-active" type="button" data-color="white" aria-label="White" aria-pressed="true">
+              <span class="swatch__dot swatch__dot--white"></span>
+              <span>WHITE</span>
+            </button>
+            <button class="swatch" type="button" data-color="black" aria-label="Black" aria-pressed="false">
+              <span class="swatch__dot swatch__dot--black"></span>
+              <span>BLACK</span>
+            </button>
+            <button class="swatch" type="button" data-color="red" aria-label="Red" aria-pressed="false">
+              <span class="swatch__dot swatch__dot--red"></span>
+              <span>RED</span>
+            </button>
+          </div>
+
+          <button id="shopButton" class="shop-button" type="button">Shop now</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Hidden by default. Add ?debug=1 to the URL to show it. -->
+  <aside id="debug" class="debug" aria-hidden="true"></aside>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

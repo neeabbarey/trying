@@ -1,0 +1,372 @@
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --ink: #f5f3ee;
+  --muted: rgba(245, 243, 238, 0.68);
+  --panel: rgba(17, 17, 16, 0.82);
+  --panel-border: rgba(255, 255, 255, 0.11);
+  --signal: #d53a2b;
+
+  --image-scale: 1;
+  --image-x: 0px;
+  --image-y: 0px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+}
+
+button {
+  font: inherit;
+}
+
+.experience {
+  isolation: isolate;
+}
+
+.visual {
+  touch-action: manipulation;
+}
+
+.visual__image {
+  transform: translate3d(var(--image-x), var(--image-y), 0) scale(var(--image-scale));
+  transform-origin: 50% 50%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+/* One continuous, almost imperceptible push-in. */
+.visual.is-continuing .visual__image {
+  animation: continuation-push var(--continuation-duration, 950ms) cubic-bezier(.28, .75, .32, 1) forwards;
+}
+
+@keyframes continuation-push {
+  0% {
+    transform: translate3d(var(--image-x), var(--image-y), 0) scale(var(--image-scale));
+  }
+  100% {
+    transform: translate3d(var(--image-x), var(--image-y), 0) scale(calc(var(--image-scale) * 1.008));
+  }
+}
+
+
+/*
+  Approximate foreground-sneaker mask traced from the attached reference frame.
+  It intentionally stays conservative around the shoe so we do not recolour the pants/background.
+*/
+.recolor-layer {
+  --recolor-opacity: 0;
+  --recolor-filter: grayscale(1) brightness(1);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--recolor-opacity);
+  clip-path: polygon(
+    7% 71.5%,
+    12% 67.0%,
+    20% 62.7%,
+    29% 58.2%,
+    39% 54.3%,
+    49% 51.4%,
+    60% 51.0%,
+    70% 52.0%,
+    79% 54.7%,
+    86% 58.6%,
+    92% 66.2%,
+    95% 72.7%,
+    93% 75.5%,
+    83% 77.2%,
+    69% 78.0%,
+    54% 78.3%,
+    38% 78.5%,
+    23% 78.0%,
+    12% 76.0%
+  );
+  transition: opacity 260ms ease, filter 260ms ease;
+}
+
+.recolor-layer__image {
+  filter: var(--recolor-filter);
+  mix-blend-mode: multiply;
+  opacity: 0.94;
+}
+
+.recolor-layer.is-highlighted {
+  --recolor-opacity: 0.075;
+  --recolor-filter: grayscale(1) brightness(1.16) contrast(1.02);
+}
+
+.recolor-layer.is-black {
+  --recolor-opacity: 0.78;
+  --recolor-filter: grayscale(1) brightness(0.28) contrast(1.12);
+}
+
+.recolor-layer.is-white {
+  --recolor-opacity: 0;
+}
+
+.recolor-layer.is-red {
+  --recolor-opacity: 0.76;
+  --recolor-filter: grayscale(1) sepia(0.96) saturate(7.2) hue-rotate(323deg) brightness(0.86) contrast(1.06);
+}
+
+.shoe-hotspot {
+  position: absolute;
+  z-index: 4;
+  left: 4%;
+  right: 3%;
+  bottom: calc(16% + var(--safe-bottom));
+  height: 28%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 42% 45% 32% 38%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visual.is-ready .shoe-hotspot {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.shoe-hotspot:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 4px;
+}
+
+.hint {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(18px + var(--safe-bottom));
+  transform: translate(-50%, 12px);
+  padding: 9px 13px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.52);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 350ms ease, transform 350ms ease;
+}
+
+.visual.is-ready .hint {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.visual.is-exploring .hint,
+.visual.is-exploring .shoe-hotspot {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.controls {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 16px calc(12px + var(--safe-bottom));
+  border-top: 1px solid var(--panel-border);
+  background: var(--panel);
+  backdrop-filter: blur(18px) saturate(0.85);
+  -webkit-backdrop-filter: blur(18px) saturate(0.85);
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 420ms cubic-bezier(.2, .75, .2, 1), opacity 260ms ease;
+}
+
+.visual.is-exploring .controls {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.controls__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.controls__eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.controls__close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.controls__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.swatches {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.swatch {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 7px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.swatch:active,
+.shop-button:active,
+.controls__close:active {
+  transform: scale(0.97);
+}
+
+.swatch.is-active {
+  border-color: rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+}
+
+.swatch__dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.swatch__dot--white {
+  background: #f4f2ed;
+}
+
+.swatch__dot--black {
+  background: #111;
+}
+
+.swatch__dot--red {
+  background: #a9211d;
+}
+
+.shop-button {
+  flex: 0 0 auto;
+  height: 42px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+  background: #f2efe8;
+  color: #151412;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.shop-button:hover {
+  filter: brightness(1.03);
+}
+
+.debug {
+  position: fixed;
+  z-index: 20;
+  top: calc(8px + var(--safe-top));
+  left: calc(8px + var(--safe-left));
+  max-width: calc(100vw - 16px - var(--safe-left) - var(--safe-right));
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f4f4f4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  white-space: pre;
+  pointer-events: none;
+  display: none;
+}
+
+.debug.is-visible {
+  display: block;
+}
+
+@media (min-width: 700px) {
+  .visual {
+    width: min(100vw, 540px);
+    height: 100dvh;
+    margin: 0 auto;
+  }
+
+  .experience {
+    display: grid;
+    place-items: center;
+    background: #151515;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual.is-continuing .visual__image,
+  .visual.is-ready .visual__image {
+    animation: none;
+  }
+
+  .hint,
+  .controls,
+  .recolor-layer {
+    transition-duration: 1ms;
+  }
+}
